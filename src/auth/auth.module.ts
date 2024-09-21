@@ -15,6 +15,7 @@ import { App, AppSchema } from './schemas/app.schema';
 import { Otp, OtpSchema } from './schemas/otp.schema';
 import { AuthMiddleware } from 'src/common/middlewares/auth.middleware';
 import { Code, CodeSchema } from './schemas/code.schema';
+import { Token, TokenSchema } from './schemas/token.schema';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { Code, CodeSchema } from './schemas/code.schema';
       { name: App.name, schema: AppSchema },
       { name: Otp.name, schema: OtpSchema },
       { name: Code.name, schema: CodeSchema },
+      { name: Token.name, schema: TokenSchema },
     ]),
   ],
   controllers: [AuthController],

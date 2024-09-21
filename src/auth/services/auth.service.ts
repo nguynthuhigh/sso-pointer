@@ -19,6 +19,7 @@ import { randomBytes } from 'crypto';
 import { getTokenDto } from '../dto/get-token.dto';
 import { requestAuthDto } from '../dto/request-auth.dto';
 import { Code } from '../schemas/code.schema';
+import { Token } from '../schemas/token.schema';
 @Injectable()
 @UseFilters(HttpExceptionFilter)
 export class AuthService {
@@ -28,6 +29,7 @@ export class AuthService {
     private otpService: OtpService,
     @InjectModel(App.name) private readonly appModel: Model<App>,
     @InjectModel(Code.name) private readonly codeModel: Model<Code>,
+    @InjectModel(Token.name) private readonly tokenModel: Model<Token>,
   ) {}
   async signUp(createUser: CreateUserDto): Promise<any> {
     const user = await this.usersService.findOne(createUser.email);
@@ -52,6 +54,11 @@ export class AuthService {
       secretAccess: process.env.ACCESS_KEY,
       secretRefresh: process.env.REFRESH_KEY,
     });
+    await this.tokenModel.create({
+      accessToken: await bcrypt.hash(tokens.accessToken, 10),
+      refreshToken: await bcrypt.hash(tokens.refreshToken, 10),
+      userID: createdUser._id,
+    });
     return tokens;
   }
   async signIn(signIn: CreateUserDto): Promise<any> {
@@ -66,6 +73,11 @@ export class AuthService {
       id: foundUser._id.toString(),
       secretAccess: process.env.ACCESS_KEY,
       secretRefresh: process.env.REFRESH_KEY,
+    });
+    await this.tokenModel.create({
+      accessToken: await bcrypt.hash(tokens.accessToken, 10),
+      refreshToken: await bcrypt.hash(tokens.refreshToken, 10),
+      userID: foundUser._id,
     });
     return tokens;
   }
@@ -140,6 +152,17 @@ export class AuthService {
       code.userID,
       process.env.ACCESS_KEY,
     );
+    await this.tokenModel.create({
+      accessToken: await bcrypt.hash(token.accessToken, 10),
+      userID: code.userID,
+      appID: new Types.ObjectId(getAccessToken.clientId),
+    });
+    const deletedCode = await this.codeModel.deleteOne({
+      code: getAccessToken.code,
+    });
+    if (deletedCode.deletedCount === 0) {
+      throw new BadRequestException('Oops!, try again');
+    }
     return token;
   }
 }

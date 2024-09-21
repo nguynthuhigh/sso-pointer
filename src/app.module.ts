@@ -15,6 +15,7 @@ import { AuthMiddleware } from './common/middlewares/auth.middleware';
 import { Otp, OtpSchema } from './auth/schemas/otp.schema';
 import { App, AppSchema } from './auth/schemas/app.schema';
 import { Code, CodeSchema } from './auth/schemas/code.schema';
+import { Token, TokenSchema } from './auth/schemas/token.schema';
 @Module({
   imports: [
     ConfigModule.forRoot(),
@@ -24,6 +25,7 @@ import { Code, CodeSchema } from './auth/schemas/code.schema';
       { name: Otp.name, schema: OtpSchema },
       { name: App.name, schema: AppSchema },
       { name: Code.name, schema: CodeSchema },
+      { name: Token.name, schema: TokenSchema },
     ]),
     MailerModule.forRoot({
       transport: {
