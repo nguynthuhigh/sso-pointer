@@ -14,6 +14,8 @@ import { newAppDto } from './dto/new-app.dto';
 import { HttpExceptionFilter } from 'src/common/filter/http-exception.filter';
 import { Request } from 'express';
 import { Types } from 'mongoose';
+import { getTokenDto } from './dto/get-token.dto';
+import { requestAuthDto } from './dto/request-auth.dto';
 @Controller('auth')
 @UseFilters(HttpExceptionFilter)
 export class AuthController {
@@ -69,4 +71,17 @@ export class AuthController {
   }
   @Post('delete-oauth-app')
   async deleteOauthApp() {}
+  @Post('authorize')
+  async Oauth(@Body() reqAuth: requestAuthDto, @Req() req: Request) {
+    const code = await this.authService.requestAuthorize({
+      ...reqAuth,
+      id: req['userID'],
+    });
+    return code;
+  }
+  @Post('access_token')
+  async getAccessToken(@Body() body: getTokenDto) {
+    const token = await this.authService.getAccessToken(body);
+    return token;
+  }
 }

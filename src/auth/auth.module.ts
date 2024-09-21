@@ -1,4 +1,9 @@
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { AuthController } from './auth.controller';
 import { AuthService } from './services/auth.service';
 import { UsersModule } from 'src/modules/users/users.module';
@@ -9,12 +14,16 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { App, AppSchema } from './schemas/app.schema';
 import { Otp, OtpSchema } from './schemas/otp.schema';
 import { AuthMiddleware } from 'src/common/middlewares/auth.middleware';
+import { Code, CodeSchema } from './schemas/code.schema';
 
 @Module({
   imports: [
     UsersModule,
-    MongooseModule.forFeature([{ name: App.name, schema: AppSchema }]),
-    MongooseModule.forFeature([{ name: Otp.name, schema: OtpSchema }]),
+    MongooseModule.forFeature([
+      { name: App.name, schema: AppSchema },
+      { name: Otp.name, schema: OtpSchema },
+      { name: Code.name, schema: CodeSchema },
+    ]),
   ],
   controllers: [AuthController],
   providers: [AuthService, TokenService, JwtService, OtpService],
@@ -22,6 +31,14 @@ import { AuthMiddleware } from 'src/common/middlewares/auth.middleware';
 })
 export class AuthModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(AuthMiddleware).forRoutes(AuthController);
+    consumer
+      .apply(AuthMiddleware)
+      .forRoutes(
+        { path: '/auth/generate-client-secret', method: RequestMethod.ALL },
+        { path: '/auth/get-apps', method: RequestMethod.ALL },
+        { path: '/auth/app-details', method: RequestMethod.ALL },
+        { path: '/auth/new-oauth-app', method: RequestMethod.ALL },
+        { path: '/auth/authorize', method: RequestMethod.ALL },
+      );
   }
 }

@@ -19,6 +19,16 @@ export class TokenService {
     //save
     return { accessToken, refreshToken };
   }
+  async signAccessToken(
+    id: ObjectId,
+    secretAccess,
+  ): Promise<{ accessToken: string }> {
+    const accessToken = this.jwtService.sign(
+      { id: id },
+      { secret: secretAccess, expiresIn: '15m' },
+    );
+    return { accessToken };
+  }
   async verifyToken(token: string, key: string): Promise<{ id: ObjectId }> {
     try {
       const payload = await this.jwtService.verify(token, {

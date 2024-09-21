@@ -14,6 +14,7 @@ import { MailerModule } from '@nestjs-modules/mailer';
 import { AuthMiddleware } from './common/middlewares/auth.middleware';
 import { Otp, OtpSchema } from './auth/schemas/otp.schema';
 import { App, AppSchema } from './auth/schemas/app.schema';
+import { Code, CodeSchema } from './auth/schemas/code.schema';
 @Module({
   imports: [
     ConfigModule.forRoot(),
@@ -22,6 +23,7 @@ import { App, AppSchema } from './auth/schemas/app.schema';
     MongooseModule.forFeature([
       { name: Otp.name, schema: OtpSchema },
       { name: App.name, schema: AppSchema },
+      { name: Code.name, schema: CodeSchema },
     ]),
     MailerModule.forRoot({
       transport: {
@@ -61,6 +63,15 @@ import { App, AppSchema } from './auth/schemas/app.schema';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(AuthMiddleware).forRoutes(UsersController);
+    consumer
+      .apply(AuthMiddleware)
+      .forRoutes
+
+      // { path: '/auth/app-details', method: RequestMethod.ALL },
+      // { path: '/auth/app-details', method: RequestMethod.ALL },
+      // { path: '/auth/app-details', method: RequestMethod.ALL },
+      // { path: '/auth/app-details', method: RequestMethod.ALL },
+      // { path: '/auth/app-details', method: RequestMethod.ALL },
+      ();
   }
 }

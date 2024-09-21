@@ -16,6 +16,9 @@ import { Model, Types } from 'mongoose';
 import { App, ClientSecretModel } from '../schemas/app.schema';
 import { newAppDto } from '../dto/new-app.dto';
 import { randomBytes } from 'crypto';
+import { getTokenDto } from '../dto/get-token.dto';
+import { requestAuthDto } from '../dto/request-auth.dto';
+import { Code } from '../schemas/code.schema';
 @Injectable()
 @UseFilters(HttpExceptionFilter)
 export class AuthService {
@@ -24,6 +27,7 @@ export class AuthService {
     private tokenService: TokenService,
     private otpService: OtpService,
     @InjectModel(App.name) private readonly appModel: Model<App>,
+    @InjectModel(Code.name) private readonly codeModel: Model<Code>,
   ) {}
   async signUp(createUser: CreateUserDto): Promise<any> {
     const user = await this.usersService.findOne(createUser.email);
@@ -95,13 +99,47 @@ export class AuthService {
       clientSecret: clientSecret.toString('hex'),
       userID: new Types.ObjectId(id),
     });
-    console.log(newClientSecret);
     const updatedApp = await app.updateOne({
       $push: { clientSecrets: newClientSecret },
     });
     if (updatedApp.modifiedCount === 0) {
       throw new BadRequestException('Fail Generate Client Secret');
     }
-    return { message: 'Add new client secret success!' };
+    return { message: 'Add new client secret success!', data: newClientSecret };
+  }
+  async requestAuthorize(requestAuth: requestAuthDto) {
+    const app = await this.appModel.findById(
+      new Types.ObjectId(requestAuth.clientId),
+    );
+    if (!app) {
+      throw new NotFoundException('App Not Found');
+    }
+    const code = randomBytes(12);
+    const newCode = new this.codeModel({
+      userID: new Types.ObjectId(requestAuth.id),
+      code: code.toString('hex'),
+    });
+    const addedCode = await newCode.save();
+    return addedCode;
+  }
+  async getAccessToken(getAccessToken: getTokenDto) {
+    const code = await this.codeModel.findOne({
+      code: getAccessToken.code,
+    });
+    if (!code) {
+      throw new BadRequestException('Oops!, code not found');
+    }
+    const app = await this.appModel.findOne({
+      _id: new Types.ObjectId(getAccessToken.clientId),
+      'clientSecrets.clientSecret': getAccessToken.clientSecret,
+    });
+    if (!app) {
+      throw new NotFoundException('Client id or client secret is wrong');
+    }
+    const token = await this.tokenService.signAccessToken(
+      code.userID,
+      process.env.ACCESS_KEY,
+    );
+    return token;
   }
 }
