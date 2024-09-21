@@ -11,10 +11,12 @@ import { UsersController } from './users.controller';
 import { AuthMiddleware } from 'src/common/middlewares/auth.middleware';
 import { TokenService } from 'src/auth/services/token.service';
 import { JwtService } from '@nestjs/jwt';
+import { Token, TokenSchema } from 'src/auth/schemas/token.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([{ name: User.name, schema: UserSchema }]),
+    MongooseModule.forFeature([{ name: Token.name, schema: TokenSchema }]),
   ],
   providers: [UsersService, TokenService, JwtService],
   controllers: [UsersController],

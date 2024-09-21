@@ -12,7 +12,7 @@ export class Token extends Document {
   refreshToken: string;
   @Prop({ type: Types.ObjectId, required: true, ref: User.name })
   userID: Types.ObjectId;
-  @Prop({ type: Types.ObjectId, required: true, ref: App.name })
+  @Prop({ type: Types.ObjectId, ref: App.name })
   appID: Types.ObjectId;
 }
 export const TokenSchema = SchemaFactory.createForClass(Token);
