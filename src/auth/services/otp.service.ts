@@ -40,6 +40,12 @@ export class OtpService {
     if (!bcrypt.compare(verifyOtpDto.otp, otpData.otp)) {
       throw new BadRequestException('OTP has expired');
     }
+    const deletedOtp = await this.otpModel.deleteMany({
+      email: verifyOtpDto.email,
+    });
+    if (deletedOtp.deletedCount === 0) {
+      throw new BadRequestException('OTP has expired');
+    }
     return otpData;
   }
 }

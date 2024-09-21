@@ -16,6 +16,8 @@ export class AuthController {
     const message = await this.authService.verifySignUp(body);
     return message;
   }
+  @Post('sign-in')
+  async signIn() {}
   // @Post('mailer')
   // async Mailer() {
   //   await this.mailerService.sendMail({
