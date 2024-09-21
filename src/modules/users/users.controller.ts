@@ -1,9 +1,10 @@
-import { Body, Controller, Post, UseFilters } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UseFilters } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UsersService } from './users.service';
 import { HttpExceptionFilter } from 'src/common/filter/http-exception.filter';
 import { User } from './interface/user.interface';
-@Controller('users')
+import { Request } from 'express';
+@Controller('user')
 @UseFilters(HttpExceptionFilter)
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -16,5 +17,10 @@ export class UsersController {
   async getUsers(): Promise<User[]> {
     const data = await this.usersService.get();
     return data;
+  }
+  @Get('profile')
+  async getProfile(@Req() req: Request) {
+    console.log(req['user']);
+    return req['user'];
   }
 }

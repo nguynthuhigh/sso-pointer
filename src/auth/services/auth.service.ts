@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable, UseFilters } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  UseFilters,
+} from '@nestjs/common';
 import { HttpExceptionFilter } from 'src/common/filter/http-exception.filter';
 import { CreateUserDto } from 'src/modules/users/dto/create-user.dto';
 import { UsersService } from 'src/modules/users/users.service';
@@ -6,6 +11,11 @@ import * as bcrypt from 'bcrypt';
 import { TokenService } from './token.service';
 import { OtpService } from './otp.service';
 import { VerifyUserDto } from '../dto/verify-user.dto';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model, Types } from 'mongoose';
+import { App } from '../schemas/app.schema';
+import { newAppDto } from '../dto/new-app.dto';
+import { randomBytes } from 'crypto';
 @Injectable()
 @UseFilters(HttpExceptionFilter)
 export class AuthService {
@@ -13,6 +23,7 @@ export class AuthService {
     private usersService: UsersService,
     private tokenService: TokenService,
     private otpService: OtpService,
+    @InjectModel(App.name) private readonly appModel: Model<App>,
   ) {}
   async signUp(createUser: CreateUserDto): Promise<any> {
     const user = await this.usersService.findOne(createUser.email);
@@ -28,18 +39,62 @@ export class AuthService {
   }
   async verifySignUp(verifyUser: VerifyUserDto): Promise<any> {
     const data = await this.otpService.verifyOTP(verifyUser);
-    // console.log(hash);
-    // console.log(createUser);
     const createdUser = await this.usersService.create({
       email: data.email,
       password: data.password,
     });
     const tokens = await this.tokenService.signToken({
       id: createdUser._id.toString(),
-      secretAccess: '123',
-      secretRefresh: '123',
+      secretAccess: process.env.ACCESS_KEY,
+      secretRefresh: process.env.REFRESH_KEY,
     });
-    console.log(tokens);
     return tokens;
+  }
+  async signIn(signIn: CreateUserDto): Promise<any> {
+    const foundUser = await this.usersService.findOne(signIn.email);
+    if (!foundUser) {
+      throw new BadRequestException('Email or password is wrong');
+    }
+    if (!bcrypt.compare(signIn.password, foundUser.password)) {
+      throw new BadRequestException('Email or password is wrong');
+    }
+    const tokens = await this.tokenService.signToken({
+      id: foundUser._id.toString(),
+      secretAccess: process.env.ACCESS_KEY,
+      secretRefresh: process.env.REFRESH_KEY,
+    });
+    return tokens;
+  }
+  async newOauthApp(newOauthApp: newAppDto) {
+    return await this.appModel.create({ ...newOauthApp });
+  }
+  async getOauthApps(id: string) {
+    return await this.appModel
+      .find({ userID: id })
+      .select({ image: 1, applicationName: 1 })
+      .lean()
+      .exec();
+  }
+  async getOauthAppDetails(id: string) {
+    return await this.appModel
+      .findById(new Types.ObjectId(id))
+      .populate({
+        path: 'userID',
+        select: 'name username email image',
+      })
+      .lean()
+      .exec();
+  }
+  async generateClientSecret(clientId: string) {
+    const app = await this.appModel.findById(new Types.ObjectId(clientId));
+    if (!app) {
+      throw new NotFoundException('App Not Found');
+    }
+    const clientSecret = randomBytes(12);
+    const updatedApp = await app.updateOne({ clientSecret: clientSecret });
+    if (updatedApp.modifiedCount === 0) {
+      throw new BadRequestException('Fail Generate Client Secret');
+    }
+    return { message: 'Add new client secret success!' };
   }
 }

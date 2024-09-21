@@ -1,8 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { SignTokenDto } from '../dto/sign-token.dto';
-// import { VerifyTokenDto } from './dto/verify-token.dto';
-
+import { ObjectId } from 'typeorm';
 @Injectable()
 export class TokenService {
   constructor(private jwtService: JwtService) {}
@@ -17,9 +16,18 @@ export class TokenService {
       { id: signToken.id },
       { secret: signToken.secretRefresh, expiresIn: '15d' },
     );
+    //save
     return { accessToken, refreshToken };
   }
-  //   async verifyToken(verifyToken: VerifyTokenDto) {
-
-  //   }
+  async verifyToken(token: string, key: string): Promise<{ id: ObjectId }> {
+    try {
+      const payload = await this.jwtService.verify(token, {
+        secret: key,
+      });
+      return { id: payload.id };
+    } catch (error) {
+      console.log(error);
+      throw new UnauthorizedException('Unauthorized');
+    }
+  }
 }

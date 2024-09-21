@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersController } from './modules/users/users.controller';
@@ -11,10 +11,18 @@ import { AuthModule } from './auth/auth.module';
 import { AuthController } from './auth/auth.controller';
 import { AuthService } from './auth/services/auth.service';
 import { MailerModule } from '@nestjs-modules/mailer';
+import { AuthMiddleware } from './common/middlewares/auth.middleware';
+import { Otp, OtpSchema } from './auth/schemas/otp.schema';
+import { App, AppSchema } from './auth/schemas/app.schema';
 @Module({
   imports: [
     ConfigModule.forRoot(),
+
     MongooseModule.forRoot(process.env.MONGODB_URI),
+    MongooseModule.forFeature([
+      { name: Otp.name, schema: OtpSchema },
+      { name: App.name, schema: AppSchema },
+    ]),
     MailerModule.forRoot({
       transport: {
         host: 'smtp.gmail.com',
@@ -51,4 +59,8 @@ import { MailerModule } from '@nestjs-modules/mailer';
     },
   ],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(AuthMiddleware).forRoutes(UsersController);
+  }
+}
