@@ -13,7 +13,7 @@ import { OtpService } from './otp.service';
 import { VerifyUserDto } from '../dto/verify-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { App } from '../schemas/app.schema';
+import { App, ClientSecretModel } from '../schemas/app.schema';
 import { newAppDto } from '../dto/new-app.dto';
 import { randomBytes } from 'crypto';
 @Injectable()
@@ -85,13 +85,20 @@ export class AuthService {
       .lean()
       .exec();
   }
-  async generateClientSecret(clientId: string) {
+  async generateClientSecret(clientId: string, id: string) {
     const app = await this.appModel.findById(new Types.ObjectId(clientId));
     if (!app) {
       throw new NotFoundException('App Not Found');
     }
     const clientSecret = randomBytes(12);
-    const updatedApp = await app.updateOne({ clientSecret: clientSecret });
+    const newClientSecret = new ClientSecretModel({
+      clientSecret: clientSecret.toString('hex'),
+      userID: new Types.ObjectId(id),
+    });
+    console.log(newClientSecret);
+    const updatedApp = await app.updateOne({
+      $push: { clientSecrets: newClientSecret },
+    });
     if (updatedApp.modifiedCount === 0) {
       throw new BadRequestException('Fail Generate Client Secret');
     }

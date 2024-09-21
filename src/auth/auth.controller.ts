@@ -57,8 +57,14 @@ export class AuthController {
     return msg;
   }
   @Post('generate-client-secret')
-  async generateClientSecret(clientId: string) {
-    const msg = await this.authService.getOauthAppDetails(clientId);
+  async generateClientSecret(
+    @Body() body: { clientId: string },
+    @Req() req: Request,
+  ) {
+    const msg = await this.authService.generateClientSecret(
+      body.clientId,
+      req['userID'],
+    );
     return msg;
   }
   @Post('delete-oauth-app')
