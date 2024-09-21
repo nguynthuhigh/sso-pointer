@@ -59,7 +59,7 @@ export class AuthService {
     if (!foundUser) {
       throw new BadRequestException('Email or password is wrong');
     }
-    if (!bcrypt.compare(signIn.password, foundUser.password)) {
+    if ((await bcrypt.compare(signIn.password, foundUser.password)) === false) {
       throw new BadRequestException('Email or password is wrong');
     }
     const tokens = await this.tokenService.signToken({
