@@ -22,7 +22,6 @@ export class AuthController {
   constructor(private readonly authService: AuthService) {}
   @Post('sign-up')
   async signUp(@Body() body: CreateUserDto): Promise<any> {
-    console.log(body);
     const message = await this.authService.signUp(body);
     return message;
   }
@@ -35,6 +34,11 @@ export class AuthController {
   async signIn(@Body() body: CreateUserDto) {
     const data = await this.authService.signIn(body);
     return data;
+  }
+  @Post('refresh-token')
+  async refreshToken(@Body() body: string, @Req() req: Request) {
+    const refreshToken = body; //get from cookie
+    return await this.authService.refreshToken(refreshToken, req['userID']);
   }
   @Post('new-oauth-app')
   async newOauthApp(@Body() body: newAppDto, @Req() req: Request) {

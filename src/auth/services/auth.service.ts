@@ -145,4 +145,14 @@ export class AuthService {
     }
     return token;
   }
+  async refreshToken(refreshToken: string, id: string) {
+    await this.tokenService.verifyToken(refreshToken, process.env.REFRESH_KEY);
+    const tokens = await this.tokenService.updateToken({
+      id: id,
+      secretAccess: process.env.ACCESS_KEY,
+      secretRefresh: process.env.REFRESH_KEY,
+      refreshToken: refreshToken,
+    });
+    return tokens;
+  }
 }

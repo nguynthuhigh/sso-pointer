@@ -31,6 +31,31 @@ export class TokenService {
     });
     return { accessToken, refreshToken };
   }
+  async updateToken(
+    signToken: SignTokenDto,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
+    const accessToken = this.jwtService.sign(
+      { id: signToken.id },
+      { secret: signToken.secretAccess, expiresIn: '15m' },
+    );
+    const refreshToken = this.jwtService.sign(
+      { id: signToken.id },
+      { secret: signToken.secretRefresh, expiresIn: '15d' },
+    );
+    const crypto = new Crypto();
+    const updatedToken = await this.tokenModel.updateOne(
+      { refreshToken: crypto.hashData(signToken.refreshToken) },
+      {
+        accessToken: crypto.hashData(accessToken),
+        refreshToken: crypto.hashData(refreshToken),
+        userID: new Types.ObjectId(signToken.id),
+      },
+    );
+    if (updatedToken.modifiedCount === 0) {
+      throw new UnauthorizedException('Fail refresh token');
+    }
+    return { accessToken, refreshToken };
+  }
   async signAccessToken(
     id: ObjectId,
     secretAccess: string,
