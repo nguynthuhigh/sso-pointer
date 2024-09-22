@@ -2,9 +2,7 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
-  UseFilters,
 } from '@nestjs/common';
-import { HttpExceptionFilter } from 'src/common/filter/http-exception.filter';
 import { CreateUserDto } from 'src/modules/users/dto/create-user.dto';
 import { UsersService } from 'src/modules/users/users.service';
 import * as bcrypt from 'bcrypt';
@@ -20,7 +18,6 @@ import { getTokenDto } from '../dto/get-token.dto';
 import { requestAuthDto } from '../dto/request-auth.dto';
 import { Code } from '../schemas/code.schema';
 @Injectable()
-@UseFilters(HttpExceptionFilter)
 export class AuthService {
   constructor(
     private usersService: UsersService,
