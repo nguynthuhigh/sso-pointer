@@ -42,10 +42,6 @@ export class AuthController {
   }
   @Post('new-oauth-app')
   async newOauthApp(@Body() body: newAppDto, @Req() req: Request) {
-    console.log({
-      ...body,
-      userID: new Types.ObjectId(req['userID']),
-    });
     const msg = await this.authService.newOauthApp({
       ...body,
       userID: new Types.ObjectId(req['userID']),
@@ -87,5 +83,10 @@ export class AuthController {
   async getAccessToken(@Body() body: getTokenDto) {
     const token = await this.authService.getAccessToken(body);
     return token;
+  }
+  @Get('get-authorized-apps')
+  async getAuthorizedApps(@Req() req: Request) {
+    const data = await this.authService.getAuthorizedApps(req['userID']);
+    return data;
   }
 }

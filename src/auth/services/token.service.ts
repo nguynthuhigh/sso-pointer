@@ -69,6 +69,7 @@ export class TokenService {
     await this.tokenModel.create({
       accessToken: crypto.hashData(accessToken),
       userID: new Types.ObjectId(id),
+      type: 'oauth',
     });
     return { accessToken };
   }

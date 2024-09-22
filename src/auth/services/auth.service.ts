@@ -17,6 +17,7 @@ import { randomBytes } from 'crypto';
 import { getTokenDto } from '../dto/get-token.dto';
 import { requestAuthDto } from '../dto/request-auth.dto';
 import { Code } from '../schemas/code.schema';
+import { Token } from '../schemas/token.schema';
 @Injectable()
 export class AuthService {
   constructor(
@@ -25,6 +26,7 @@ export class AuthService {
     private otpService: OtpService,
     @InjectModel(App.name) private readonly appModel: Model<App>,
     @InjectModel(Code.name) private readonly codeModel: Model<Code>,
+    @InjectModel(Token.name) private readonly tokenModel: Model<Token>,
   ) {}
   async signUp(createUser: CreateUserDto): Promise<any> {
     const user = await this.usersService.findOne(createUser.email);
@@ -144,6 +146,13 @@ export class AuthService {
       throw new BadRequestException('Oops!, try again');
     }
     return token;
+  }
+  async getAuthorizedApps(id: string) {
+    console.log(id);
+    return await this.tokenModel.find({
+      userID: new Types.ObjectId(id),
+      type: 'oauth',
+    });
   }
   async refreshToken(refreshToken: string, id: string) {
     await this.tokenService.verifyToken(refreshToken, process.env.REFRESH_KEY);

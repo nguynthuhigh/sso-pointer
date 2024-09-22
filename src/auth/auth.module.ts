@@ -41,6 +41,7 @@ export class AuthModule implements NestModule {
         { path: '/auth/app-details', method: RequestMethod.ALL },
         { path: '/auth/new-oauth-app', method: RequestMethod.ALL },
         { path: '/auth/authorize', method: RequestMethod.ALL },
+        { path: '/auth/get-authorized-apps', method: RequestMethod.ALL },
       );
   }
 }
