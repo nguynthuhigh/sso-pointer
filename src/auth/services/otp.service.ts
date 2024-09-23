@@ -5,8 +5,8 @@ import * as bcrypt from 'bcrypt';
 import { InjectModel } from '@nestjs/mongoose';
 import { Otp } from '../schemas/otp.schema';
 import { Model } from 'mongoose';
-import { GenerateOTP } from 'src/common/utils/generate-otp';
-import { HttpExceptionFilter } from 'src/common/filter/http-exception.filter';
+import { GenerateOTP } from '../../common/utils/generate-otp';
+import { HttpExceptionFilter } from '../../common/filter/http-exception.filter';
 import { VerifyOtpDto } from '../dto/verify-otp.dto';
 @UseFilters(HttpExceptionFilter)
 @Injectable()

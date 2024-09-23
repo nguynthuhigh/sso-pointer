@@ -5,7 +5,7 @@ import { ObjectId } from 'typeorm';
 import { Token } from '../schemas/token.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
-import { Crypto } from 'src/common/utils/crypto';
+import { Crypto } from '../../common/utils/crypto';
 @Injectable()
 export class TokenService {
   constructor(
