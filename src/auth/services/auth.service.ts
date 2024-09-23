@@ -40,7 +40,9 @@ export class AuthService {
     });
     return { message: 'Check your email!' };
   }
-  async verifySignUp(verifyUser: VerifyUserDto): Promise<any> {
+  async verifySignUp(
+    verifyUser: VerifyUserDto,
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     const data = await this.otpService.verifyOTP(verifyUser);
     const createdUser = await this.usersService.create({
       email: data.email,
