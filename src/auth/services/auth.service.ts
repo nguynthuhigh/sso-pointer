@@ -85,8 +85,15 @@ export class AuthService {
       .findById(new Types.ObjectId(id))
       .populate({
         path: 'userID',
-        select: 'name username email image',
+        select: 'name username email image ',
       })
+      .lean()
+      .exec();
+  }
+  async OauthAppDetails(id: string) {
+    return await this.appModel
+      .findById(new Types.ObjectId(id))
+      .select('applicationName applicationDescription callBackUrl')
       .lean()
       .exec();
   }

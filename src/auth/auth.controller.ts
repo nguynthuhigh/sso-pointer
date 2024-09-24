@@ -89,4 +89,9 @@ export class AuthController {
     const data = await this.authService.getAuthorizedApps(req['userID']);
     return data;
   }
+  @Get('oauth-app/:id')
+  async getOAuthApp(@Param('id') id: string) {
+    const msg = await this.authService.OauthAppDetails(id);
+    return msg;
+  }
 }
