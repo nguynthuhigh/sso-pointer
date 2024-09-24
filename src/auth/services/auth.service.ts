@@ -34,7 +34,7 @@ export class AuthService {
       throw new BadRequestException('Email is already exsits');
     }
     const hash = await bcrypt.hash(createUser.password, 10);
-    this.otpService.sendOTP({
+    await this.otpService.sendOTP({
       to: createUser.email,
       password: hash,
     });
