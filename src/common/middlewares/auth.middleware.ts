@@ -41,7 +41,7 @@ export class AuthMiddleware implements NestMiddleware {
     if (!user) {
       throw new UnauthorizedException('Unauthorized');
     }
-    console.log('first');
+    console.log(id.id);
     req['userID'] = id.id;
     req['user'] = user;
     next();

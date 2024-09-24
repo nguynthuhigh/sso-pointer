@@ -75,7 +75,7 @@ export class AuthService {
   }
   async getOauthApps(id: string) {
     return await this.appModel
-      .find({ userID: id })
+      .find({ userID: new Types.ObjectId(id) })
       .select({ image: 1, applicationName: 1 })
       .lean()
       .exec();
