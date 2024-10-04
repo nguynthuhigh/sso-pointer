@@ -101,6 +101,7 @@ export class AuthController {
       httpOnly: true,
       sameSite: 'none',
       secure: true,
+      maxAge: 1000 * 60 * 60 * 15,
     });
     return 'ok';
   }
