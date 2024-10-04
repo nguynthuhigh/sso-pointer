@@ -5,6 +5,7 @@ import {
   Param,
   Post,
   Req,
+  Res,
   UseFilters,
 } from '@nestjs/common';
 import { AuthService } from './services/auth.service';
@@ -12,7 +13,7 @@ import { CreateUserDto } from 'src/modules/users/dto/create-user.dto';
 import { VerifyUserDto } from './dto/verify-user.dto';
 import { newAppDto } from './dto/new-app.dto';
 import { HttpExceptionFilter } from 'src/common/filter/http-exception.filter';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { Types } from 'mongoose';
 import { getTokenDto } from './dto/get-token.dto';
 import { requestAuthDto } from './dto/request-auth.dto';
@@ -93,5 +94,12 @@ export class AuthController {
   async getOAuthApp(@Param('id') id: string) {
     const msg = await this.authService.OauthAppDetails(id);
     return msg;
+  }
+  @Post('test')
+  async test(@Res({ passthrough: true }) res: Response) {
+    res.cookie('token', '123', {
+      httpOnly: true,
+    });
+    return 'ok';
   }
 }

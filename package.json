@@ -34,6 +34,7 @@
     "class-validator": "^0.14.1",
     "cookie-parser": "^1.4.6",
     "handlebars": "^4.7.8",
+    "ioredis": "^5.4.1",
     "mongoose": "^8.6.3",
     "nodemailer": "^6.9.15",
     "otp-generator": "^4.0.1",
