@@ -100,6 +100,7 @@ export class AuthController {
     res.cookie('token', '123', {
       httpOnly: true,
       sameSite: 'none',
+      secure: true,
     });
     return 'ok';
   }
