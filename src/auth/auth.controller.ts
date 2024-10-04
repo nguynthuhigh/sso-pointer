@@ -99,6 +99,7 @@ export class AuthController {
   async test(@Res({ passthrough: true }) res: Response) {
     res.cookie('token', '123', {
       httpOnly: true,
+      sameSite: 'none',
     });
     return 'ok';
   }
