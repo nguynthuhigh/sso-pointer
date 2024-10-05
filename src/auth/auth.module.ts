@@ -13,10 +13,10 @@ import { TokenService } from './services/token.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { App, AppSchema } from './schemas/app.schema';
 import { Otp, OtpSchema } from './schemas/otp.schema';
-import { AuthMiddleware } from 'src/common/middlewares/auth.middleware';
+import { AuthMiddleware } from '../common/middlewares/auth.middleware';
 import { Code, CodeSchema } from './schemas/code.schema';
 import { Token, TokenSchema } from './schemas/token.schema';
-import { RedisModule } from 'src/common/database/redis/redis.module';
+import { RedisModule } from '../common/database/redis/redis.module';
 
 @Module({
   imports: [
