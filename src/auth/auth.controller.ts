@@ -1,22 +1,10 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Post,
-  Req,
-  Res,
-  UseFilters,
-} from '@nestjs/common';
+import { Body, Controller, Post, Req, UseFilters } from '@nestjs/common';
 import { AuthService } from './services/auth.service';
 import { CreateUserDto } from 'src/modules/users/dto/create-user.dto';
 import { VerifyUserDto } from './dto/verify-user.dto';
-import { newAppDto } from './dto/new-app.dto';
 import { HttpExceptionFilter } from 'src/common/filter/http-exception.filter';
-import { Request, Response } from 'express';
-import { Types } from 'mongoose';
+import { Request } from 'express';
 import { getTokenDto } from './dto/get-token.dto';
-import { requestAuthDto } from './dto/request-auth.dto';
 @Controller('auth')
 @UseFilters(HttpExceptionFilter)
 export class AuthController {
@@ -41,69 +29,37 @@ export class AuthController {
     const refreshToken = body; //get from cookie
     return await this.authService.refreshToken(refreshToken, req['userID']);
   }
-  @Post('new-oauth-app')
-  async newOauthApp(@Body() body: newAppDto, @Req() req: Request) {
-    const msg = await this.authService.newOauthApp({
-      ...body,
-      userID: new Types.ObjectId(req['userID']),
-    });
-    return msg;
-  }
-  @Get('get-apps')
-  async getApps(@Req() req: Request) {
-    const msg = await this.authService.getOauthApps(req['userID']);
-    return msg;
-  }
-  @Get('app-details/:id')
-  async getAppDetails(@Param('id') id: string) {
-    const msg = await this.authService.getOauthAppDetails(id);
-    return msg;
-  }
-  @Post('generate-client-secret')
-  async generateClientSecret(
-    @Body() body: { clientId: string },
-    @Req() req: Request,
-  ) {
-    const msg = await this.authService.generateClientSecret(
-      body.clientId,
-      req['userID'],
-    );
-    return msg;
-  }
-  @Post('delete-oauth-app')
-  async deleteOauthApp() {}
   @Post('authorize')
-  async Oauth(@Body() reqAuth: requestAuthDto, @Req() req: Request) {
-    const code = await this.authService.requestAuthorize({
-      ...reqAuth,
-      id: req['userID'],
-    });
+  async Authorize(@Req() req: Request) {
+    const code = await this.authService.requestAuthorize(
+      req['user']._id,
+      req['user'].email,
+    );
     return code;
   }
-  @Post('access_token')
-  async getAccessToken(@Body() body: getTokenDto) {
+  @Post('access-token')
+  async getAccessTokenSSO(@Body() body: getTokenDto) {
     const token = await this.authService.getAccessToken(body);
     return token;
   }
-  @Get('get-authorized-apps')
-  async getAuthorizedApps(@Req() req: Request) {
-    const data = await this.authService.getAuthorizedApps(req['userID']);
-    return data;
+  @Post('verify-token')
+  async verifyAccessTokenSSO(@Body() body: { accessToken: string }) {
+    return await this.authService.verifyTokenSSO(body.accessToken);
   }
-  @Get('oauth-app/:id')
-  async getOAuthApp(@Param('id') id: string) {
-    const msg = await this.authService.OauthAppDetails(id);
-    return msg;
+  @Post('refresh_token')
+  async refreshTokenSSO(@Body() body: getTokenDto) {
+    const token = await this.authService.getAccessToken(body);
+    return token;
   }
-  @Post('test')
-  async test(@Res({ passthrough: true }) res: Response) {
-    res.cookie('token', '123', {
-      httpOnly: true,
-      sameSite: 'none',
-      secure: true,
-      maxAge: 1000 * 60 * 60 * 15,
-      domain: '.vercel.app',
-    });
-    return 'ok';
-  }
+  // @Post('test')
+  // async test(@Res({ passthrough: true }) res: Response) {
+  //   res.cookie('token', '123', {
+  //     httpOnly: true,
+  //     sameSite: 'none',
+  //     secure: true,
+  //     maxAge: 1000 * 60 * 60 * 15,
+  //     domain: '.vercel.app',
+  //   });
+  //   return 'ok';
+  // }
 }
