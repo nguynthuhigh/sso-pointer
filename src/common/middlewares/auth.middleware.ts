@@ -17,7 +17,6 @@ export class AuthMiddleware implements NestMiddleware {
     @InjectModel(Token.name) private readonly tokenModal: Model<Token>,
   ) {}
   async use(req: Request, res: Response, next: NextFunction) {
-    console.log('123');
     const accessToken = req.headers.authorization?.split(' ')[1];
     if (!accessToken) {
       throw new UnauthorizedException('Unauthorized');

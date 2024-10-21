@@ -65,7 +65,6 @@ export class TokenService {
     return { accessToken };
   }
   async verifyToken(token: string, key: string) {
-    console.log(key);
     try {
       const payload = this.jwtService.verify(token, {
         secret: key,

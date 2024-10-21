@@ -11,12 +11,12 @@ import { OtpService } from './otp.service';
 import { VerifyUserDto } from '../dto/verify-user.dto';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { App } from '../schemas/app.schema';
 import { randomBytes } from 'crypto';
 import { getTokenDto } from '../dto/get-token.dto';
 import { Code } from '../schemas/code.schema';
 import { Token } from '../schemas/token.schema';
 import { RedisService } from '../../common/database/redis/redis.service';
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -24,7 +24,6 @@ export class AuthService {
     private tokenService: TokenService,
     private otpService: OtpService,
     private readonly redisService: RedisService,
-    @InjectModel(App.name) private readonly appModel: Model<App>,
     @InjectModel(Code.name) private readonly codeModel: Model<Code>,
     @InjectModel(Token.name) private readonly tokenModel: Model<Token>,
   ) {}
@@ -83,11 +82,12 @@ export class AuthService {
   }
   async getAccessToken(getAccessToken: getTokenDto) {
     const result = await this.redisService.getKey(getAccessToken.code);
+    const { email, id } = JSON.parse(result);
     const token = await this.tokenService.signAccessTokenPair(
       JSON.parse(result).id,
       JSON.parse(result).email,
     );
-    return token;
+    return { ...token, email, id };
   }
   async verifyTokenSSO(accessToken: string) {
     const payload = await this.tokenService.verifyTokenSSO(

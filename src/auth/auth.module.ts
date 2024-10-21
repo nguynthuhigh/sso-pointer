@@ -11,7 +11,6 @@ import { JwtModule } from '@nestjs/jwt';
 import { OtpService } from './services/otp.service';
 import { TokenService } from './services/token.service';
 import { MongooseModule } from '@nestjs/mongoose';
-import { App, AppSchema } from './schemas/app.schema';
 import { Otp, OtpSchema } from './schemas/otp.schema';
 import { AuthMiddleware } from '../common/middlewares/auth.middleware';
 import { Code, CodeSchema } from './schemas/code.schema';
@@ -22,7 +21,6 @@ import { RedisModule } from '../common/database/redis/redis.module';
   imports: [
     UsersModule,
     MongooseModule.forFeature([
-      { name: App.name, schema: AppSchema },
       { name: Otp.name, schema: OtpSchema },
       { name: Code.name, schema: CodeSchema },
       { name: Token.name, schema: TokenSchema },

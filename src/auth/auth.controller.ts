@@ -1,4 +1,4 @@
-import { Body, Controller, Post, Req, UseFilters } from '@nestjs/common';
+import { Body, Controller, Get, Post, Req, UseFilters } from '@nestjs/common';
 import { AuthService } from './services/auth.service';
 import { CreateUserDto } from 'src/modules/users/dto/create-user.dto';
 import { VerifyUserDto } from './dto/verify-user.dto';
@@ -46,20 +46,11 @@ export class AuthController {
   async verifyAccessTokenSSO(@Body() body: { accessToken: string }) {
     return await this.authService.verifyTokenSSO(body.accessToken);
   }
-  @Post('refresh_token')
-  async refreshTokenSSO(@Body() body: getTokenDto) {
-    const token = await this.authService.getAccessToken(body);
-    return token;
-  }
-  // @Post('test')
-  // async test(@Res({ passthrough: true }) res: Response) {
-  //   res.cookie('token', '123', {
-  //     httpOnly: true,
-  //     sameSite: 'none',
-  //     secure: true,
-  //     maxAge: 1000 * 60 * 60 * 15,
-  //     domain: '.vercel.app',
-  //   });
-  //   return 'ok';
+  // @Post('refresh_token')
+  // async refreshTokenSSO(@Body() body: getTokenDto) {
+  //   const token = await this.authService.getAccessToken(body);
+  //   return token;
   // }
+  @Get('test')
+  async test() {}
 }
