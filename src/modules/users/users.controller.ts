@@ -23,9 +23,4 @@ export class UsersController {
     console.log(req['user']);
     return req['user'];
   }
-  @Get('profile-authorize')
-  async getProfileAuthorize(@Req() req: Request) {
-    console.log(req['user']);
-    return req['user'];
-  }
 }

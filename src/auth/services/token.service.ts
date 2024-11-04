@@ -1,36 +1,34 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { SignTokenDto } from '../dto/sign-token.dto';
+import { ObjectId } from 'typeorm';
 import { Token } from '../schemas/token.schema';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { RedisService } from '../../common/database/redis/redis.service';
+import { Model, Types } from 'mongoose';
+import { Crypto } from '../../common/utils/crypto';
 @Injectable()
 export class TokenService {
   constructor(
     private jwtService: JwtService,
     @InjectModel(Token.name) private readonly tokenModel: Model<Token>,
-    private readonly redisService: RedisService,
   ) {}
   async signToken(
     signToken: SignTokenDto,
   ): Promise<{ accessToken: string; refreshToken: string }> {
     const accessToken = this.jwtService.sign(
       { id: signToken.id },
-      {
-        secret: process.env.ACCESS_KEY,
-        algorithm: 'HS256',
-        expiresIn: '15m',
-      },
+      { secret: signToken.secretAccess, expiresIn: '15m' },
     );
     const refreshToken = this.jwtService.sign(
       { id: signToken.id },
-      {
-        secret: process.env.REFRESH_KEY,
-        algorithm: 'HS256',
-        expiresIn: '15d',
-      },
+      { secret: signToken.secretRefresh, expiresIn: '15d' },
     );
+    const crypto = new Crypto();
+    await this.tokenModel.create({
+      accessToken: crypto.hashData(accessToken),
+      refreshToken: crypto.hashData(refreshToken),
+      userID: new Types.ObjectId(signToken.id),
+    });
     return { accessToken, refreshToken };
   }
   async updateToken(
@@ -44,43 +42,51 @@ export class TokenService {
       { id: signToken.id },
       { secret: signToken.secretRefresh, expiresIn: '15d' },
     );
+    const crypto = new Crypto();
+    const updatedToken = await this.tokenModel.updateOne(
+      { refreshToken: crypto.hashData(signToken.refreshToken) },
+      {
+        accessToken: crypto.hashData(accessToken),
+        refreshToken: crypto.hashData(refreshToken),
+        userID: new Types.ObjectId(signToken.id),
+      },
+    );
+    if (updatedToken.modifiedCount === 0) {
+      throw new UnauthorizedException('Fail refresh token');
+    }
     return { accessToken, refreshToken };
   }
-  async signAccessTokenPair(
-    id: string,
-    email: string,
+  async signAccessToken(
+    id: ObjectId,
+    secretAccess: string,
   ): Promise<{ accessToken: string }> {
-    const payload = {
-      id: id,
-      email: email,
-    };
-    const getAccessToken = await this.redisService.getKey(id);
-    if (getAccessToken) {
-      return { accessToken: getAccessToken };
-    }
-    const accessToken = this.jwtService.sign(payload, {
-      privateKey: process.env.SSO_PRIVATE_KEY,
+    const accessToken = this.jwtService.sign(
+      { id: id },
+      { secret: secretAccess, expiresIn: '15m' },
+    );
+    //store
+    const crypto = new Crypto();
+    await this.tokenModel.create({
+      accessToken: crypto.hashData(accessToken),
+      userID: new Types.ObjectId(id),
+      type: 'oauth',
     });
-    await this.redisService.setKey(id, accessToken);
     return { accessToken };
   }
-  async verifyToken(token: string, key: string) {
+  async verifyToken(token: string, key: string): Promise<{ id: ObjectId }> {
     try {
-      const payload = this.jwtService.verify(token, {
+      const payload = await this.jwtService.verify(token, {
         secret: key,
       });
-      return payload;
+      return { id: payload.id };
     } catch {
-      throw new UnauthorizedException('Unauthorized');
-    }
-  }
-  async verifyTokenSSO(token: string, key: string) {
-    try {
-      const payload = this.jwtService.verify(token, {
-        publicKey: key,
+      const crypto = new Crypto();
+      await this.tokenModel.deleteOne({
+        $or: [
+          { refreshToken: crypto.hashData(token) },
+          { accessToken: crypto.hashData(token) },
+        ],
       });
-      return payload;
-    } catch {
       throw new UnauthorizedException('Unauthorized');
     }
   }
