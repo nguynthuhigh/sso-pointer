@@ -13,6 +13,7 @@ import { AuthService } from './auth/services/auth.service';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { AuthMiddleware } from './common/middlewares/auth.middleware';
 import { Otp, OtpSchema } from './auth/schemas/otp.schema';
+import { App, AppSchema } from './auth/schemas/app.schema';
 import { Code, CodeSchema } from './auth/schemas/code.schema';
 import { Token, TokenSchema } from './auth/schemas/token.schema';
 @Module({
@@ -22,6 +23,7 @@ import { Token, TokenSchema } from './auth/schemas/token.schema';
     MongooseModule.forRoot(process.env.MONGODB_URI),
     MongooseModule.forFeature([
       { name: Otp.name, schema: OtpSchema },
+      { name: App.name, schema: AppSchema },
       { name: Code.name, schema: CodeSchema },
       { name: Token.name, schema: TokenSchema },
     ]),
