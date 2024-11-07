@@ -77,6 +77,7 @@ export class AuthController {
       ...reqAuth,
       id: req['userID'],
     });
+    console.log('first');
     return code;
   }
   @Post('access-token')

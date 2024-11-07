@@ -9,5 +9,7 @@ export class Authorized extends Document {
   user: Types.ObjectId;
   @Prop({ type: Types.ObjectId, required: true, ref: App.name })
   app: Types.ObjectId;
+  @Prop({ unique: null })
+  accessToken: string;
 }
 export const AuthorizedSchema = SchemaFactory.createForClass(Authorized);

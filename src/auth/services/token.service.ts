@@ -69,13 +69,6 @@ export class TokenService {
       });
       return { id: payload.id };
     } catch {
-      const crypto = new Crypto();
-      await this.tokenModel.deleteOne({
-        $or: [
-          { refreshToken: crypto.hashData(token) },
-          { accessToken: crypto.hashData(token) },
-        ],
-      });
       throw new UnauthorizedException('Unauthorized');
     }
   }
