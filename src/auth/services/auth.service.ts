@@ -18,6 +18,7 @@ import { getTokenDto } from '../dto/get-token.dto';
 import { requestAuthDto } from '../dto/request-auth.dto';
 import { Code } from '../schemas/code.schema';
 import { Token } from '../schemas/token.schema';
+import { Authorized } from '../schemas/authorized.schema';
 @Injectable()
 export class AuthService {
   constructor(
@@ -26,6 +27,8 @@ export class AuthService {
     private otpService: OtpService,
     @InjectModel(App.name) private readonly appModel: Model<App>,
     @InjectModel(Code.name) private readonly codeModel: Model<Code>,
+    @InjectModel(Authorized.name)
+    private readonly authorizedModel: Model<Authorized>,
     @InjectModel(Token.name) private readonly tokenModel: Model<Token>,
   ) {}
   async signUp(createUser: CreateUserDto): Promise<any> {
@@ -81,7 +84,7 @@ export class AuthService {
       .exec();
   }
   async getOauthAppDetails(id: string) {
-    return await this.appModel
+    const app = await this.appModel
       .findById(new Types.ObjectId(id))
       .populate({
         path: 'userID',
@@ -89,13 +92,18 @@ export class AuthService {
       })
       .lean()
       .exec();
+    const totalUser = await this.authorizedModel.countDocuments({
+      app: new Types.ObjectId(id),
+    });
+    return { ...app, totalUser: totalUser };
   }
   async OauthAppDetails(id: string) {
-    return await this.appModel
+    const data = await this.appModel
       .findById(new Types.ObjectId(id))
-      .select('applicationName applicationDescription callBackUrl')
+      .select('applicationName applicationDescription callBackUrl image')
       .lean()
       .exec();
+    return data;
   }
   async generateClientSecret(clientId: string, id: string) {
     const app = await this.appModel.findById(new Types.ObjectId(clientId));
@@ -116,17 +124,24 @@ export class AuthService {
     return { message: 'Add new client secret success!', data: newClientSecret };
   }
   async requestAuthorize(requestAuth: requestAuthDto) {
-    const app = await this.appModel.findById(
-      new Types.ObjectId(requestAuth.clientId),
-    );
+    const userId = new Types.ObjectId(requestAuth.id);
+    const appId = new Types.ObjectId(requestAuth.clientId);
+    const authorized = await this.authorizedModel.findOne({
+      user: userId,
+      app: appId,
+    });
+    const app = await this.appModel.findById(appId);
     if (!app) {
       throw new NotFoundException('App Not Found');
     }
     const code = randomBytes(12);
     const newCode = new this.codeModel({
-      userID: new Types.ObjectId(requestAuth.id),
+      userID: userId,
       code: code.toString('hex'),
     });
+    if (!authorized) {
+      await this.authorizedModel.create({ user: userId, app: appId });
+    }
     const addedCode = await newCode.save();
     return addedCode;
   }
@@ -158,10 +173,18 @@ export class AuthService {
   }
   async getAuthorizedApps(id: string) {
     console.log(id);
-    return await this.tokenModel.find({
-      userID: new Types.ObjectId(id),
-      type: 'oauth',
-    });
+    const data = await this.authorizedModel
+      .find({
+        user: new Types.ObjectId(id),
+      })
+      .populate({
+        path: 'app',
+        select: 'applicationName applicationDescription callBackUrl image',
+      })
+      .lean()
+      .exec();
+    console.log(data);
+    return data;
   }
   async refreshToken(refreshToken: string, id: string) {
     await this.tokenService.verifyToken(refreshToken, process.env.REFRESH_KEY);

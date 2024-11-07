@@ -79,7 +79,7 @@ export class AuthController {
     });
     return code;
   }
-  @Post('access_token')
+  @Post('access-token')
   async getAccessToken(@Body() body: getTokenDto) {
     const token = await this.authService.getAccessToken(body);
     return token;
@@ -91,7 +91,7 @@ export class AuthController {
   }
   @Get('oauth-app/:id')
   async getOAuthApp(@Param('id') id: string) {
-    const msg = await this.authService.OauthAppDetails(id);
-    return msg;
+    const data = await this.authService.OauthAppDetails(id);
+    return data;
   }
 }

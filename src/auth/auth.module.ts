@@ -16,6 +16,7 @@ import { Otp, OtpSchema } from './schemas/otp.schema';
 import { AuthMiddleware } from 'src/common/middlewares/auth.middleware';
 import { Code, CodeSchema } from './schemas/code.schema';
 import { Token, TokenSchema } from './schemas/token.schema';
+import { Authorized, AuthorizedSchema } from './schemas/authorized.schema';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { Token, TokenSchema } from './schemas/token.schema';
       { name: Otp.name, schema: OtpSchema },
       { name: Code.name, schema: CodeSchema },
       { name: Token.name, schema: TokenSchema },
+      { name: Authorized.name, schema: AuthorizedSchema },
     ]),
   ],
   controllers: [AuthController],

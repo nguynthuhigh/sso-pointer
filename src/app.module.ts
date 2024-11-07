@@ -16,6 +16,7 @@ import { Otp, OtpSchema } from './auth/schemas/otp.schema';
 import { App, AppSchema } from './auth/schemas/app.schema';
 import { Code, CodeSchema } from './auth/schemas/code.schema';
 import { Token, TokenSchema } from './auth/schemas/token.schema';
+import { Authorized, AuthorizedSchema } from './auth/schemas/authorized.schema';
 @Module({
   imports: [
     ConfigModule.forRoot(),
@@ -26,6 +27,7 @@ import { Token, TokenSchema } from './auth/schemas/token.schema';
       { name: App.name, schema: AppSchema },
       { name: Code.name, schema: CodeSchema },
       { name: Token.name, schema: TokenSchema },
+      { name: Authorized.name, schema: AuthorizedSchema },
     ]),
     MailerModule.forRoot({
       transport: {
