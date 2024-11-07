@@ -19,7 +19,6 @@ import { requestAuthDto } from '../dto/request-auth.dto';
 import { Code } from '../schemas/code.schema';
 import { Token } from '../schemas/token.schema';
 import { Authorized } from '../schemas/authorized.schema';
-import { User } from 'src/modules/users/schemas/user.schema';
 @Injectable()
 export class AuthService {
   constructor(

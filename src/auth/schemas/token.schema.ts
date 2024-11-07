@@ -6,9 +6,7 @@ export type TokenDocument = HydratedDocument<Token>;
 
 @Schema({ timestamps: true })
 export class Token extends Document {
-  @Prop({ unique: true })
   accessToken: string;
-  @Prop({ unique: true })
   refreshToken: string;
   @Prop({ type: Types.ObjectId, required: true, ref: User.name })
   userID: Types.ObjectId;
