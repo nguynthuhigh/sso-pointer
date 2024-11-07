@@ -23,12 +23,7 @@ export class TokenService {
       { id: signToken.id },
       { secret: signToken.secretRefresh, expiresIn: '15d' },
     );
-    const crypto = new Crypto();
-    await this.tokenModel.create({
-      accessToken: crypto.hashData(accessToken),
-      refreshToken: crypto.hashData(refreshToken),
-      userID: new Types.ObjectId(signToken.id),
-    });
+
     return { accessToken, refreshToken };
   }
   async updateToken(
@@ -36,7 +31,7 @@ export class TokenService {
   ): Promise<{ accessToken: string; refreshToken: string }> {
     const accessToken = this.jwtService.sign(
       { id: signToken.id },
-      { secret: signToken.secretAccess, expiresIn: '15m' },
+      { secret: signToken.secretAccess, expiresIn: '1h' },
     );
     const refreshToken = this.jwtService.sign(
       { id: signToken.id },
