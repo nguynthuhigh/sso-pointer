@@ -19,6 +19,7 @@ import { requestAuthDto } from '../dto/request-auth.dto';
 import { Code } from '../schemas/code.schema';
 import { Token } from '../schemas/token.schema';
 import { Authorized } from '../schemas/authorized.schema';
+import { User } from 'src/modules/users/schemas/user.schema';
 @Injectable()
 export class AuthService {
   constructor(
@@ -146,9 +147,11 @@ export class AuthService {
     return addedCode;
   }
   async getAccessToken(getAccessToken: getTokenDto) {
-    const code = await this.codeModel.findOne({
-      code: getAccessToken.code,
-    });
+    const code = await this.codeModel
+      .findOne({
+        code: getAccessToken.code,
+      })
+      .populate({ path: 'userID', select: 'username email image' });
     if (!code) {
       throw new BadRequestException('Oops!, code not found');
     }
@@ -169,7 +172,7 @@ export class AuthService {
     if (deletedCode.deletedCount === 0) {
       throw new BadRequestException('Oops!, try again');
     }
-    return token;
+    return { ...token, user: code.userID };
   }
   async getAuthorizedApps(id: string) {
     console.log(id);

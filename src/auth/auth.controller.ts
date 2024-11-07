@@ -81,8 +81,8 @@ export class AuthController {
   }
   @Post('access-token')
   async getAccessToken(@Body() body: getTokenDto) {
-    const token = await this.authService.getAccessToken(body);
-    return token;
+    const data = await this.authService.getAccessToken(body);
+    return data;
   }
   @Get('get-authorized-apps')
   async getAuthorizedApps(@Req() req: Request) {

@@ -64,13 +64,7 @@ export class TokenService {
       { id: id },
       { secret: secretAccess, expiresIn: '15m' },
     );
-    //store
-    const crypto = new Crypto();
-    await this.tokenModel.create({
-      accessToken: crypto.hashData(accessToken),
-      userID: new Types.ObjectId(id),
-      type: 'oauth',
-    });
+
     return { accessToken };
   }
   async verifyToken(token: string, key: string): Promise<{ id: ObjectId }> {
