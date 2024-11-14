@@ -7,7 +7,7 @@ import {
 import { AuthController } from './auth.controller';
 import { AuthService } from './services/auth.service';
 import { UsersModule } from 'src/modules/users/users.module';
-import { JwtService } from '@nestjs/jwt';
+import { JwtModule, JwtService } from '@nestjs/jwt';
 import { OtpService } from './services/otp.service';
 import { TokenService } from './services/token.service';
 import { MongooseModule } from '@nestjs/mongoose';
@@ -28,6 +28,12 @@ import { Authorized, AuthorizedSchema } from './schemas/authorized.schema';
       { name: Token.name, schema: TokenSchema },
       { name: Authorized.name, schema: AuthorizedSchema },
     ]),
+    JwtModule.register({
+      global: true,
+      privateKey: process.env.SSO_PRIVATE_KEY,
+      publicKey: process.env.SSO_PUBLIC_KEY,
+      signOptions: { algorithm: 'RS256', expiresIn: '1h' },
+    }),
   ],
   controllers: [AuthController],
   providers: [AuthService, TokenService, JwtService, OtpService],

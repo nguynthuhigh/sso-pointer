@@ -17,11 +17,11 @@ export class TokenService {
   ): Promise<{ accessToken: string; refreshToken: string }> {
     const accessToken = this.jwtService.sign(
       { id: signToken.id },
-      { secret: signToken.secretAccess, expiresIn: '15m' },
+      { secret: signToken.secretAccess, expiresIn: '15m', algorithm: 'HS256' },
     );
     const refreshToken = this.jwtService.sign(
       { id: signToken.id },
-      { secret: signToken.secretRefresh, expiresIn: '15d' },
+      { secret: signToken.secretRefresh, expiresIn: '15d', algorithm: 'HS256' },
     );
 
     return { accessToken, refreshToken };
@@ -31,11 +31,11 @@ export class TokenService {
   ): Promise<{ accessToken: string; refreshToken: string }> {
     const accessToken = this.jwtService.sign(
       { id: signToken.id },
-      { secret: signToken.secretAccess, expiresIn: '1h' },
+      { secret: signToken.secretAccess, expiresIn: '1h', algorithm: 'HS256' },
     );
     const refreshToken = this.jwtService.sign(
       { id: signToken.id },
-      { secret: signToken.secretRefresh, expiresIn: '15d' },
+      { secret: signToken.secretRefresh, expiresIn: '15d', algorithm: 'HS256' },
     );
     const crypto = new Crypto();
     const updatedToken = await this.tokenModel.updateOne(
@@ -57,7 +57,7 @@ export class TokenService {
   ): Promise<{ accessToken: string }> {
     const accessToken = this.jwtService.sign(
       { id: id },
-      { secret: secretAccess, expiresIn: '15m' },
+      { secret: secretAccess, expiresIn: '15m', algorithm: 'HS256' },
     );
 
     return { accessToken };
@@ -73,8 +73,11 @@ export class TokenService {
     }
   }
   async signAccessTokenPair(payload: any): Promise<{ accessToken: string }> {
+    console.log(process.env.SSO_PRIVATE_KEY);
     const accessToken = this.jwtService.sign(payload, {
       privateKey: process.env.SSO_PRIVATE_KEY,
+      algorithm: 'RS256',
+      expiresIn: '1h',
     });
     return { accessToken };
   }
