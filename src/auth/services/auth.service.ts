@@ -161,10 +161,9 @@ export class AuthService {
     if (!app) {
       throw new NotFoundException('Client id or client secret is wrong');
     }
-    const token = await this.tokenService.signAccessToken(
-      code.userID,
-      process.env.ACCESS_KEY,
-    );
+    const token = await this.tokenService.signAccessTokenPair({
+      user: code.userID,
+    });
     const deletedCode = await this.codeModel.deleteOne({
       code: getAccessToken.code,
     });

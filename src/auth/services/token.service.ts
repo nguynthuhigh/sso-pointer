@@ -72,4 +72,10 @@ export class TokenService {
       throw new UnauthorizedException('Unauthorized');
     }
   }
+  async signAccessTokenPair(payload: any): Promise<{ accessToken: string }> {
+    const accessToken = this.jwtService.sign(payload, {
+      privateKey: process.env.SSO_PRIVATE_KEY,
+    });
+    return { accessToken };
+  }
 }
