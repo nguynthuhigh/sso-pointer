@@ -150,7 +150,9 @@ export class AuthService {
       .findOne({
         code: getAccessToken.code,
       })
-      .populate({ path: 'userID', select: 'username email image' });
+      .populate({ path: 'userID', select: 'username email image' })
+      .lean()
+      .exec();
     if (!code) {
       throw new BadRequestException('Oops!, code not found');
     }
